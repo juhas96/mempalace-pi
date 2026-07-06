@@ -178,7 +178,7 @@ export class MemPalaceMcpClient {
 						{
 							protocolVersion: "2025-11-25",
 							capabilities: { tools: {} },
-							clientInfo: { name: "pi-mempalace", version: "0.2.2" },
+							clientInfo: { name: "pi-mempalace", version: "0.2.7" },
 						},
 						signal,
 					);
