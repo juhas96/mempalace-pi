@@ -59,8 +59,10 @@ export function registerHooks(pi: ExtensionAPI, runtime: MemPalaceRuntime) {
 		if (currentCount - runtime.lastAutoSaveCount < SAVE_INTERVAL) return;
 
 		const hookSettings = await runtime.refreshHookSettings();
-		runtime.lastAutoSaveCount = currentCount;
 		const ingest = await maybeAutoIngest(pi, ctx, undefined, "background");
+		if (ingest.started) {
+			runtime.lastAutoSaveCount = currentCount;
+		}
 		runtime.recordAutoIngest(ingest);
 		runtime.persistState();
 		if (shouldUseSilentSave(hookSettings)) {

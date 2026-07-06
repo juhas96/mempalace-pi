@@ -2,7 +2,7 @@ import type { ExtensionAPI, ExtensionContext } from "@mariozechner/pi-coding-age
 import { existsSync, statSync } from "node:fs";
 import { dirname, resolve } from "node:path";
 import { chooseAutoIngestTarget } from "./auto-ingest-policy.js";
-import { AUTO_SAVE_MARKER } from "./constants";
+import { AUTO_SAVE_MARKER, DEFAULT_MINE_TIMEOUT_MS } from "./constants";
 
 type SessionEntryLike = {
 	id?: string;
@@ -169,10 +169,26 @@ export async function maybeAutoIngest(
 	signal?: AbortSignal,
 	mode: "background" | "foreground" = "background",
 ): Promise<AutoIngestOutcome> {
+	// Suspend autosave for maintenance (repair/migrate)
+	if (process.env.MEMPALACE_SUSPEND_AUTOSAVE === "1") {
+		return { started: false, mode };
+	}
+
 	const { targetPath, targetSource } = resolveAutoIngestTarget(ctx);
 	if (!targetPath || !targetSource) return { started: false, mode };
+
+	// Mine timeout — prevents unbounded runs that block admin operations
+	const timeoutMs = parseInt(process.env.MEMPALACE_MINE_TIMEOUT_MS ?? "", 10);
+	const effectiveTimeout = Number.isFinite(timeoutMs) && timeoutMs > 0 ? timeoutMs : DEFAULT_MINE_TIMEOUT_MS;
+	let timedOut = false;
+	const controller = new AbortController();
+	const timeout = setTimeout(() => { timedOut = true; controller.abort(); }, effectiveTimeout);
+	signal?.addEventListener("abort", () => { clearTimeout(timeout); controller.abort(); }, { once: true });
+	if (signal?.aborted) { timedOut = true; controller.abort(); }
+	const mineSignal = controller.signal;
+
 	if (mode === "background") {
-		void runMemPalace(pi, ["mine", targetPath], signal).catch(() => undefined);
+		void runMemPalace(pi, ["mine", targetPath], mineSignal).catch(() => undefined);
 		return {
 			started: true,
 			mode,
@@ -182,15 +198,28 @@ export async function maybeAutoIngest(
 		};
 	}
 
-	const run = await runMemPalace(pi, ["mine", targetPath], signal);
-	return {
-		started: true,
-		mode,
-		targetPath,
-		targetSource,
-		command: run.command,
-		result: run.result,
-	};
+	// Foreground mode — never throw, return structured failure on timeout/error
+	try {
+		const run = await runMemPalace(pi, ["mine", targetPath], mineSignal);
+		clearTimeout(timeout);
+		if (timedOut) {
+			return { started: true, mode, result: { stdout: "", stderr: "mine timed out", code: -1 }, command: run.command, targetPath, targetSource };
+		}
+		return {
+			started: true,
+			mode,
+			targetPath,
+			targetSource,
+			command: run.command,
+			result: run.result,
+		};
+	} catch (err) {
+		clearTimeout(timeout);
+		if (timedOut) {
+			return { started: true, mode, result: { stdout: "", stderr: "mine timed out", code: -1 }, command: [], targetPath, targetSource };
+		}
+		return { started: true, mode, result: { stdout: "", stderr: String(err), code: -1 }, command: [], targetPath, targetSource };
+	}
 }
 
 export function sendUserMessage(pi: ExtensionAPI, ctx: ExtensionContext, text: string) {

@@ -1,4 +1,5 @@
 export const SAVE_INTERVAL = 15;
+export const DEFAULT_MINE_TIMEOUT_MS = 300000;
 export const AUTO_SAVE_MARKER = "<mempalace-auto-save>";
 export const STOP_BLOCK_REASON = `AUTO-SAVE checkpoint (MemPalace). Save this session's key content:
 1. mempalace_diary_write — AAAK-compressed session summary

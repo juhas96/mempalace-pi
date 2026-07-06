@@ -125,6 +125,11 @@ mempalace-pi/
 
 This avoids putting helper modules inside an auto-discovered `extensions/` directory, which can cause pi to try loading non-extension files as extension entrypoints, and keeps the package closer to normal library structure best practices.
 
+## Environment Variables
+
+- `MEMPALACE_SUSPEND_AUTOSAVE=1` — skip all auto-save mine operations. Use during maintenance (repair, migrate, vacuum).
+- `MEMPALACE_MINE_TIMEOUT_MS` — timeout in milliseconds for auto-save mine processes. Default: 300000 (5 minutes). Set to a lower value to kill runaway mines faster, or higher for large directories.
+
 ## Notes
 
 This extension includes a built-in MCP bridge for `mempalace.mcp_server`, so Pi agents can use the structured MemPalace tool surface when the MCP server is available. For compatibility, the package keeps CLI-backed fallbacks for setup, mining, instructions, and for status/search if MCP cannot be started, and it can execute dynamically surfaced MemPalace tools directly through the local Python package when the MCP transport fails or is unavailable.
