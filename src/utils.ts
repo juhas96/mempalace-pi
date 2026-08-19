@@ -233,10 +233,10 @@ export function sendUserMessage(pi: ExtensionAPI, ctx: ExtensionContext, text: s
 export function getMemPalaceSetupGuidance(error: string | undefined): string | undefined {
 	if (!error) return undefined;
 	if (/No module named mempalace/i.test(error) || /mempalace package is not installed/i.test(error)) {
-		return "MemPalace is disabled because the Python package 'mempalace' is not installed in the active Python environment. Install it with: python3 -m pip install mempalace";
+		return "MemPalace is disabled because the Python package 'mempalace' is not installed in the active Python environment. Install it with: uv tool install mempalace (or: python3 -m pip install mempalace)";
 	}
-	if (/Python was not found/i.test(error) || /spawn python3 ENOENT/i.test(error) || /spawn python ENOENT/i.test(error)) {
-		return "MemPalace could not find a usable Python command in Pi's runtime environment. If Python works in your terminal but not in Pi, the PATH may differ. Run /mempalace:doctor to check what Pi can see.";
+	if (/Python was not found/i.test(error) || /MemPalace was not found/i.test(error) || /spawn (?:mempalace-mcp|python3|python) ENOENT/i.test(error)) {
+		return "MemPalace could not find a usable mempalace-mcp binary or Python command in Pi's runtime environment. If mempalace works in your terminal but not in Pi, the PATH may differ. Run /mempalace:doctor to check what Pi can see.";
 	}
 	return undefined;
 }

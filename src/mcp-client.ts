@@ -68,7 +68,10 @@ export class MemPalaceMcpClient {
 			return { commandLine: this.commandLine, tools: this.getTools() };
 		}
 
+		const customBin = process.env.MEMPALACE_MCP_BIN?.trim();
 		const attempts: Array<[string, string[]]> = [
+			...(customBin ? [[customBin, []] as [string, string[]]] : []),
+			["mempalace-mcp", []],
 			["python3", ["-m", "mempalace.mcp_server"]],
 			["python", ["-m", "mempalace.mcp_server"]],
 		];
@@ -209,11 +212,11 @@ export class MemPalaceMcpClient {
 		const tried = attemptedCommands.join(", ");
 
 		if (errors.length > 0 && errors.every((error) => /ENOENT/i.test(error.message))) {
-			return createTaggedMcpError(`Python was not found (tried: ${tried}). Install Python 3 to enable MemPalace.`, "transport");
+			return createTaggedMcpError(`MemPalace was not found (tried: ${tried}). Install MemPalace via 'uv tool install mempalace' or 'python3 -m pip install mempalace'.`, "transport");
 		}
 
 		if (/No module named mempalace/i.test(messages)) {
-			return createTaggedMcpError(`Python was found, but the mempalace package is not installed in the environment used by ${tried}.`, "transport");
+			return createTaggedMcpError(`Python was found, but the mempalace package is not installed in the environment used by ${tried}. Install with 'uv tool install mempalace' or 'python3 -m pip install mempalace'.`, "transport");
 		}
 
 		return createTaggedMcpError(errors[errors.length - 1]?.message || "Failed to start MemPalace MCP server.", "transport");

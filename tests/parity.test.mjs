@@ -115,8 +115,9 @@ test("CLI write tools trigger reconnect after successful writes", () => {
 });
 
 
-test("MCP client enforces internal connect and request timeouts", () => {
+test("MCP client enforces internal connect and request timeouts and attempts mempalace-mcp binary", () => {
 	const mcpClient = read("src/mcp-client.ts");
+	assert.match(mcpClient, /\["mempalace-mcp", \[\]\]/);
 	assert.match(mcpClient, /DEFAULT_MCP_CONNECT_TIMEOUT_MS/);
 	assert.match(mcpClient, /DEFAULT_MCP_REQUEST_TIMEOUT_MS/);
 	assert.match(mcpClient, /timed out after \$\{timeoutMs\}ms during initialize\/tools\/list/);

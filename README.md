@@ -18,7 +18,8 @@ A pi package that brings core MemPalace workflows to pi.
   - `mempalace_mine`
   - `mempalace_status`
 - MCP bridge:
-  - starts `python3 -m mempalace.mcp_server` when available
+  - starts `mempalace-mcp` (or falls back to `python3 -m mempalace.mcp_server`) when available
+  - supports custom MCP binary paths via `MEMPALACE_MCP_BIN`
   - enforces bounded MCP startup and request timeouts so stalled MCP calls fail fast instead of hanging the agent indefinitely
   - dynamically exposes the MemPalace MCP tool surface to the agent, including write and system tools when the installed server provides them
   - discovers the same MemPalace tool surface directly from the local Python package so dynamic tools remain available even when the MCP transport is unavailable
@@ -37,16 +38,22 @@ A pi package that brings core MemPalace workflows to pi.
 
 To actually use MemPalace features from Pi, you need:
 
-- Python 3.9+
-- the `mempalace` Python package installed in the Python environment visible to `python3`, `python`, or the `mempalace` executable
+- Python 3.9+ (or `uv` / standalone tools)
+- the `mempalace` package installed and available on `PATH` (via `uv tool` or `pip`)
 
 Typical setup:
+
+```bash
+uv tool install mempalace
+```
+
+Or with pip:
 
 ```bash
 python3 -m pip install mempalace
 ```
 
-If Python is not installed, or if the `mempalace` Python package is missing:
+If Python / `mempalace` is not installed, or if the binary/module is missing:
 
 - pi will still start normally
 - this extension will still load and register its slash commands/tools

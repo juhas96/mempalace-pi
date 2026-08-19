@@ -16,7 +16,7 @@ Bring `mempalace-pi` as close as practical to upstream MemPalace behavior, espec
 | Area | Upstream Claude plugin | Pi status | Resolution |
 |---|---|---:|---|
 | Slash commands | help/init/search/mine/status | Aligned | Keep command names aligned; Pi also keeps `/mempalace:doctor` for Pi diagnostics. |
-| MCP connection | plugin config points at `python3 -m mempalace.mcp_server` | Aligned | Pi starts the same MCP server internally and dynamically registers discovered tools. |
+| MCP connection | plugin config points at `python3 -m mempalace.mcp_server` | Aligned | Pi starts `mempalace-mcp` (with fallback to `python3 -m mempalace.mcp_server` or `MEMPALACE_MCP_BIN`) internally and dynamically registers discovered tools. |
 | Instruction source | `mempalace instructions <name>` via upstream docs/CLI | Adapted | Pi now prefers CLI-backed `mempalace instructions <name>` and falls back to bundled instructions if the package is unavailable. |
 | Save checkpoint cadence | stop hook every 15 human messages | Aligned | Pi keeps the 15-message cadence. |
 | Save checkpoint wording | explicit `diary_write` + `add_drawer` + optional `kg_add` guidance | Aligned | Pi save prompts now call out the same write-path tools and duplicate-check guidance. |

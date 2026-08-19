@@ -60,9 +60,9 @@ Guide the user through a full setup in this order:
 - Pi handles MCP connection itself, but the user still needs the Python package available to the Pi runtime.
 
 ## Troubleshooting order
-- Python missing → install Python 3.9+
-- mempalace package missing → python3 -m pip install mempalace
-- Pi sees a different interpreter than the terminal → compare with /mempalace:doctor
+- MemPalace / Python missing → uv tool install mempalace (or pip install mempalace on Python 3.9+)
+- mempalace package missing → uv tool install mempalace (or python3 -m pip install mempalace)
+- Pi sees a different interpreter/PATH than the terminal → compare with /mempalace:doctor
 - MCP startup failing after install → inspect /mempalace:doctor stderr and retry`,
 
 	search: `# MemPalace search
