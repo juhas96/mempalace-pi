@@ -22,7 +22,7 @@ A pi package that brings core MemPalace workflows to pi.
   - supports custom MCP binary paths via `MEMPALACE_MCP_BIN`
   - enforces bounded MCP startup and request timeouts so stalled MCP calls fail fast instead of hanging the agent indefinitely
   - dynamically exposes the MemPalace MCP tool surface to the agent, including write and system tools when the installed server provides them
-  - discovers the same MemPalace tool surface directly from the local Python package so dynamic tools remain available even when the MCP transport is unavailable
+  - discovers the same MemPalace tool surface directly from the local Python package using the installed launcher interpreter, so dynamic tools remain available even when the MCP transport is unavailable
   - synthesizes local fallback responses for MemPalace operator/system tools when the installed package does not expose those controls outside MCP
   - uses MCP for `mempalace_status` and `mempalace_search` when possible, with CLI fallback; other dynamically surfaced MemPalace tools fall back to the local Python backend when MCP fails
   - fails gracefully when Python or the `mempalace` Python package is missing, without crashing pi
@@ -38,8 +38,8 @@ A pi package that brings core MemPalace workflows to pi.
 
 To actually use MemPalace features from Pi, you need:
 
-- Python 3.9+ (or `uv` / standalone tools)
-- the `mempalace` package installed and available on `PATH` (via `uv tool` or `pip`)
+- Python 3.9+ (or `uv` / `pipx` standalone tools)
+- the `mempalace` package installed and available on `PATH` (via `uv tool`, `pipx`, or `pip`)
 
 Typical setup:
 
@@ -47,7 +47,19 @@ Typical setup:
 uv tool install mempalace
 ```
 
-Or with pip:
+Or with pipx for a per-user isolated installation:
+
+```bash
+pipx install mempalace
+```
+
+Or with pipx for a system-wide isolated installation:
+
+```bash
+pipx install --global mempalace
+```
+
+Or with pip into the active Python environment:
 
 ```bash
 python3 -m pip install mempalace
@@ -125,6 +137,7 @@ mempalace-pi/
     utils.ts        # CLI helpers and shared utilities
     constants.ts    # package constants
     mcp-client.ts   # internal MCP bridge helper
+    python-runtime.ts # isolated uv/pipx Python discovery
   README.md
   LICENSE
   package.json
@@ -134,8 +147,12 @@ This avoids putting helper modules inside an auto-discovered `extensions/` direc
 
 ## Environment Variables
 
+- `MEMPALACE_MCP_BIN` — override the MCP server executable path.
+- `MEMPALACE_PYTHON` — override the Python interpreter used for direct local fallback tools.
 - `MEMPALACE_SUSPEND_AUTOSAVE=1` — skip all auto-save mine operations. Use during maintenance (repair, migrate, vacuum).
 - `MEMPALACE_MINE_TIMEOUT_MS` — timeout in milliseconds for auto-save mine processes. Default: 300000 (5 minutes). Set to a lower value to kill runaway mines faster, or higher for large directories.
+
+The MCP and local fallback paths discover the Python interpreter from the `mempalace-mcp`/`mempalace` launcher shebang, so custom uv and pipx homes work without hardcoded directory assumptions. Ensure the relevant console-script directory is visible in Pi's `PATH`; use `/mempalace:doctor` to inspect runtime and launcher visibility.
 
 ## Notes
 

@@ -16,7 +16,7 @@ Bring `mempalace-pi` as close as practical to upstream MemPalace behavior, espec
 | Area | Upstream Claude plugin | Pi status | Resolution |
 |---|---|---:|---|
 | Slash commands | help/init/search/mine/status | Aligned | Keep command names aligned; Pi also keeps `/mempalace:doctor` for Pi diagnostics. |
-| MCP connection | plugin config points at `python3 -m mempalace.mcp_server` | Aligned | Pi starts `mempalace-mcp` (with fallback to `python3 -m mempalace.mcp_server` or `MEMPALACE_MCP_BIN`) internally and dynamically registers discovered tools. |
+| MCP connection | plugin config points at `python3 -m mempalace.mcp_server` | Aligned | Pi starts `mempalace-mcp` (with fallback to `python3 -m mempalace.mcp_server` or `MEMPALACE_MCP_BIN`) internally and dynamically registers discovered tools. Local direct-Python fallback uses `MEMPALACE_PYTHON`, then the interpreter from an installed launcher, then system Python. This supports uv tool, per-user pipx, and global pipx without fixed home paths. |
 | Instruction source | `mempalace instructions <name>` via upstream docs/CLI | Adapted | Pi now prefers CLI-backed `mempalace instructions <name>` and falls back to bundled instructions if the package is unavailable. |
 | Save checkpoint cadence | stop hook every 15 human messages | Aligned | Pi keeps the 15-message cadence. |
 | Save checkpoint wording | explicit `diary_write` + `add_drawer` + optional `kg_add` guidance | Aligned | Pi save prompts now call out the same write-path tools and duplicate-check guidance. |
@@ -75,7 +75,7 @@ These behaviors should not regress without updating this document and the parity
 2. Pi prefers CLI-backed instructions and falls back gracefully.
 3. Auto-ingest does not depend solely on `MEMPAL_DIR`.
 4. `/mempalace:doctor` reports save-path and documented-tool parity information.
-5. README/help copy reflects the aligned save workflow and operator tools.
+5. README/help copy reflects the aligned save workflow, operator tools, and uv/pipx runtime discovery.
 
 ## Related beads
 

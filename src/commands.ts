@@ -13,6 +13,7 @@ import {
 	summarizePythonProbe,
 	truncate,
 } from "./utils";
+import { discoverMemPalacePythonCandidates } from "./python-runtime.ts";
 
 function queuePrompt(pi: ExtensionAPI, ctx: ExtensionContext, text: string) {
 	sendUserMessage(pi, ctx, text);
@@ -102,6 +103,7 @@ export function registerCommands(pi: ExtensionAPI, runtime: MemPalaceRuntime) {
 			const missingTools = [...CORE_TOOLS].filter((name) => !tools.includes(name));
 			lines.push(`core extension tools: ${missingTools.length === 0 ? "ok" : `missing ${missingTools.join(", ")}`}`);
 
+			const runtimeCandidates = await discoverMemPalacePythonCandidates();
 			const pythonProbe = await probePythonEnvironment(pi).catch(() => undefined);
 
 			const { tools: localTools } = await runtime.ensureLocalFallbackTools();
@@ -116,6 +118,7 @@ export function registerCommands(pi: ExtensionAPI, runtime: MemPalaceRuntime) {
 			if (mcpGuidance) {
 				lines.push(`mcp setup required: ${mcpGuidance}`);
 			}
+			lines.push(`MemPalace Python candidates: ${runtimeCandidates.join(", ") || "none"}`);
 			if (pythonProbe) {
 				lines.push(`python visibility in Pi:\n${summarizePythonProbe(pythonProbe).join("\n")}`);
 			}

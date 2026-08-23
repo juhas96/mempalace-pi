@@ -4,6 +4,7 @@ import { tmpdir } from "node:os";
 import { join } from "node:path";
 import type { McpToolDefinition } from "./mcp-client";
 import type { ExecResult } from "./utils";
+import { discoverMemPalacePythonCandidates } from "./python-runtime.ts";
 
 export type LocalMemPalaceToolCall = {
 	command: string[];
@@ -144,10 +145,7 @@ async function runPythonMemPalaceScript(
 	args: string[],
 	signal?: AbortSignal,
 ): Promise<{ command: string[]; result: ExecResult }> {
-	const candidates: Array<[string, string[]]> = [
-		["python3", ["-c", script, ...args]],
-		["python", ["-c", script, ...args]],
-	];
+	const candidates = (await discoverMemPalacePythonCandidates()).map((command) => [command, ["-c", script, ...args]] as [string, string[]]);
 
 	let last: { command: string[]; result: ExecResult } | undefined;
 	let missingModule: { command: string[]; result: ExecResult } | undefined;
@@ -161,15 +159,23 @@ async function runPythonMemPalaceScript(
 			combined.includes("command not found") ||
 			combined.includes("not recognized as an internal or external command") ||
 			combined.includes("no such file or directory");
-		const missingMemPalaceModule = combined.includes("no module named mempalace");
+		const missingMemPalaceModule = /no module named ['"]?mempalace['"]?/i.test(combined);
 
-		if (missingMemPalaceModule && !missingModule) {
-			missingModule = last;
+		if (missingMemPalaceModule) {
+			if (!missingModule) missingModule = last;
+			continue;
 		}
-		if (!missingCommand && !missingMemPalaceModule) return last;
+		if (!missingCommand) return last;
 	}
 
-	if (missingModule) return missingModule;
+	if (missingModule) {
+		const attempted = candidates.map(([cmd]) => cmd).join(", ");
+		const appendedStderr = `${missingModule.result.stderr.trim()}\n\nAttempted MemPalace Python interpreters: ${attempted}`.trim();
+		return {
+			command: missingModule.command,
+			result: { ...missingModule.result, stderr: appendedStderr },
+		};
+	}
 	if (!last) throw new Error("No local MemPalace backend commands were attempted.");
 	return last;
 }

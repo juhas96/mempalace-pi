@@ -212,11 +212,11 @@ export class MemPalaceMcpClient {
 		const tried = attemptedCommands.join(", ");
 
 		if (errors.length > 0 && errors.every((error) => /ENOENT/i.test(error.message))) {
-			return createTaggedMcpError(`MemPalace was not found (tried: ${tried}). Install MemPalace via 'uv tool install mempalace' or 'python3 -m pip install mempalace'.`, "transport");
+			return createTaggedMcpError(`MemPalace was not found (tried: ${tried}). Install with 'uv tool install mempalace', 'pipx install mempalace', 'pipx install --global mempalace', or 'python3 -m pip install mempalace'. Ensure the launcher directory is on PATH.`, "transport");
 		}
 
 		if (/No module named mempalace/i.test(messages)) {
-			return createTaggedMcpError(`Python was found, but the mempalace package is not installed in the environment used by ${tried}. Install with 'uv tool install mempalace' or 'python3 -m pip install mempalace'.`, "transport");
+			return createTaggedMcpError(`Python was found, but the mempalace package is not installed in the environment used by ${tried}. Install with 'uv tool install mempalace', 'pipx install mempalace', 'pipx install --global mempalace', or 'python3 -m pip install mempalace'. For an existing isolated install, set MEMPALACE_PYTHON.`, "transport");
 		}
 
 		return createTaggedMcpError(errors[errors.length - 1]?.message || "Failed to start MemPalace MCP server.", "transport");
