@@ -1,6 +1,6 @@
 {
   "name": "mempalace-pi",
-  "version": "0.2.7",
+  "version": "0.2.8",
   "description": "MemPalace extension package for pi, adding commands, tools, and save reminders for memory workflows.",
   "license": "MIT",
   "type": "module",
