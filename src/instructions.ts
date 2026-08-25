@@ -61,11 +61,11 @@ Guide the user through a full setup in this order:
 - Direct local fallback tools use MEMPALACE_PYTHON when set, then the interpreter from a mempalace-mcp/mempalace launcher, then python3/python.
 
 ## Supported isolated installations
-```bash
+\`\`\`bash
 uv tool install mempalace
 pipx install mempalace
 pipx install --global mempalace
-```
+\`\`\`
 Custom uv and pipx homes are supported when their console-script bin directory is visible in Pi's PATH.
 
 ## Troubleshooting order
@@ -73,7 +73,7 @@ Custom uv and pipx homes are supported when their console-script bin directory i
 - mempalace package missing → confirm the mempalace-mcp/mempalace launcher is on PATH or set MEMPALACE_MCP_BIN
 - Pi sees a different interpreter/PATH than the terminal → compare with /mempalace:doctor
 - direct local fallback cannot import mempalace → set MEMPALACE_PYTHON to the isolated environment's Python interpreter
-- MCP startup failing after install → inspect /mempalace:doctor stderr and retry`
+- MCP startup failing after install → inspect /mempalace:doctor stderr and retry`,
 
 	search: `# MemPalace search
 

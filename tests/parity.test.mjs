@@ -3,6 +3,7 @@ import assert from "node:assert/strict";
 import { readFileSync } from "node:fs";
 import { canForegroundIngestSatisfyPrecompact, chooseAutoIngestTarget, describeAutoIngestState } from "../src/auto-ingest-policy.js";
 import { getDefaultPiHookSettings, normalizeHookSettingsPayload, shouldShowHookToast, shouldUseSilentSave } from "../src/hook-settings-policy.js";
+import { getBundledInstructions } from "../src/instructions.ts";
 
 function read(path) {
 	return readFileSync(new URL(`../${path}`, import.meta.url), "utf8");
@@ -25,6 +26,13 @@ test("instructions tool prefers CLI-backed upstream instructions with bundled fa
 	assert.match(tools, /runMemPalace\(pi, \["instructions", params\.name\]/);
 	assert.match(tools, /source: "cli"/);
 	assert.match(tools, /source: "bundled"/);
+});
+
+test("bundled init instructions include isolated installation commands", () => {
+	const instructions = getBundledInstructions("init");
+	assert.match(instructions, /```bash/);
+	assert.match(instructions, /uv tool install mempalace/);
+	assert.match(instructions, /pipx install --global mempalace/);
 });
 
 test("auto-ingest target selection prefers env then session then cwd", () => {
