@@ -233,10 +233,10 @@ export function sendUserMessage(pi: ExtensionAPI, ctx: ExtensionContext, text: s
 export function getMemPalaceSetupGuidance(error: string | undefined): string | undefined {
 	if (!error) return undefined;
 	if (/No module named mempalace/i.test(error) || /mempalace package is not installed/i.test(error)) {
-		return "MemPalace is disabled because the Python package 'mempalace' is not installed in the active Python environment. Install it with: python3 -m pip install mempalace";
+		return "MemPalace is disabled because the Python package 'mempalace' is not available to the active runtime. Install with uv tool install mempalace, pipx install mempalace, pipx install --global mempalace, or python3 -m pip install mempalace. For isolated installs, ensure the launcher directory is on PATH or set MEMPALACE_PYTHON.";
 	}
-	if (/Python was not found/i.test(error) || /spawn python3 ENOENT/i.test(error) || /spawn python ENOENT/i.test(error)) {
-		return "MemPalace could not find a usable Python command in Pi's runtime environment. If Python works in your terminal but not in Pi, the PATH may differ. Run /mempalace:doctor to check what Pi can see.";
+	if (/Python was not found/i.test(error) || /MemPalace was not found/i.test(error) || /spawn (?:mempalace-mcp|python3|python) ENOENT/i.test(error)) {
+		return "MemPalace could not find a usable mempalace-mcp binary or Python command in Pi's runtime environment. If mempalace works in your terminal but not in Pi, the PATH may differ. Run /mempalace:doctor to check what Pi can see.";
 	}
 	return undefined;
 }
@@ -266,7 +266,7 @@ export function refineSetupGuidance(guidance: string | undefined, probe?: Python
 			const visible = [python3Ok ? (probe.python3.stdout || probe.python3.stderr).trim() : "", pythonOk ? (probe.python.stdout || probe.python.stderr).trim() : ""]
 				.filter(Boolean)
 				.join(", ");
-			return `MemPalace could not start its backend, but Pi can see Python (${visible || "version detected"}). The most likely problem is that the 'mempalace' Python package is not installed in the same interpreter. Install it with: python3 -m pip install mempalace. If that still fails, run /mempalace:doctor to compare what Pi can see.`;
+			return `MemPalace could not start its backend, but Pi can see Python (${visible || "version detected"}). The package may be installed in a different isolated runtime. Ensure mempalace-mcp/mempalace is on PATH, or set MEMPALACE_PYTHON to its interpreter. Install with uv tool install mempalace, pipx install mempalace, pipx install --global mempalace, or python3 -m pip install mempalace. If that still fails, run /mempalace:doctor to compare what Pi can see.`;
 		}
 	}
 	return guidance;

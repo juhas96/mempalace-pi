@@ -49,21 +49,31 @@ When saving memory, prefer these tools when available:
 	init: `# MemPalace init
 
 Guide the user through a full setup in this order:
-1. Verify Python 3.9+ is available.
-2. Verify or install the mempalace Python package.
+1. Verify Python 3.9+ or an isolated tool manager is available.
+2. Verify or install the mempalace package.
 3. Initialize the target directory with mempalace_init.
 4. Verify health with mempalace_status or /mempalace:doctor.
 
 ## Notes for Pi
 - mempalace_instructions prefers CLI-backed upstream instructions when the mempalace package is installed.
 - If MemPalace is missing, Pi still keeps bundled instructions available so setup guidance never disappears.
-- Pi handles MCP connection itself, but the user still needs the Python package available to the Pi runtime.
+- Pi handles MCP connection itself, but the user still needs the MemPalace launcher directory visible in Pi's PATH.
+- Direct local fallback tools use MEMPALACE_PYTHON when set, then the interpreter from a mempalace-mcp/mempalace launcher, then python3/python.
+
+## Supported isolated installations
+```bash
+uv tool install mempalace
+pipx install mempalace
+pipx install --global mempalace
+```
+Custom uv and pipx homes are supported when their console-script bin directory is visible in Pi's PATH.
 
 ## Troubleshooting order
-- Python missing → install Python 3.9+
-- mempalace package missing → python3 -m pip install mempalace
-- Pi sees a different interpreter than the terminal → compare with /mempalace:doctor
-- MCP startup failing after install → inspect /mempalace:doctor stderr and retry`,
+- MemPalace / Python missing → install with uv tool install mempalace, pipx install mempalace, pipx install --global mempalace, or python3 -m pip install mempalace
+- mempalace package missing → confirm the mempalace-mcp/mempalace launcher is on PATH or set MEMPALACE_MCP_BIN
+- Pi sees a different interpreter/PATH than the terminal → compare with /mempalace:doctor
+- direct local fallback cannot import mempalace → set MEMPALACE_PYTHON to the isolated environment's Python interpreter
+- MCP startup failing after install → inspect /mempalace:doctor stderr and retry`
 
 	search: `# MemPalace search
 

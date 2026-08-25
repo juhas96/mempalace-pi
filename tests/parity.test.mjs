@@ -115,8 +115,9 @@ test("CLI write tools trigger reconnect after successful writes", () => {
 });
 
 
-test("MCP client enforces internal connect and request timeouts", () => {
+test("MCP client enforces internal connect and request timeouts and attempts mempalace-mcp binary", () => {
 	const mcpClient = read("src/mcp-client.ts");
+	assert.match(mcpClient, /\["mempalace-mcp", \[\]\]/);
 	assert.match(mcpClient, /DEFAULT_MCP_CONNECT_TIMEOUT_MS/);
 	assert.match(mcpClient, /DEFAULT_MCP_REQUEST_TIMEOUT_MS/);
 	assert.match(mcpClient, /timed out after \$\{timeoutMs\}ms during initialize\/tools\/list/);
@@ -186,10 +187,17 @@ test("status and search tools delegate fallback handling through the shared runt
 	assert.match(tools, /runtime\.runFallbackTool\(\s*"mempalace_search"/);
 });
 
-test("repo docs include Claude-plugin parity documentation", () => {
+test("repo docs include Claude-plugin parity documentation and isolated runtime guidance", () => {
 	const readme = read("README.md");
 	const parity = read("docs/claude-plugin-parity.md");
+	const runtime = read("src/python-runtime.ts");
 	assert.match(readme, /docs\/claude-plugin-parity\.md/);
+	assert.match(readme, /pipx install mempalace/);
+	assert.match(readme, /pipx install --global mempalace/);
+	assert.match(readme, /MEMPALACE_PYTHON/);
 	assert.match(parity, /Parity matrix/);
 	assert.match(parity, /Intentional Pi-specific deviations/);
+	assert.match(parity, /uv tool, per-user pipx, and global pipx/);
+	assert.match(runtime, /MEMPALACE_PYTHON/);
+	assert.match(runtime, /mempalace-mcp/);
 });
